@@ -1,28 +1,62 @@
-
 import yahoo_fin.stock_info as si
 import pandas as pd
 import numpy as np
 import concurrent.futures
 import time
 
+def pull_fin_info(df, function_call, stock_list):
+    if function_call == "get_balance_sheet":
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            for ticker in stock_list:
+                        df[ticker] = executor.submit(si.get_balance_sheet,ticker)
+        for ticker in stock_list:
+            try:
+                df[ticker] = df[ticker].result(60) # 60 sec timeout
+            except:
+                print('error on ' + ticker)
+
+    if function_call == "get_income_statement":
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            for ticker in stock_list:
+                        df[ticker] = executor.submit(si.get_balance_sheet,ticker)
+        for ticker in stock_list:
+            try:
+                df[ticker] = df[ticker].result(60) # 60 sec timeout
+            except:
+                print('error on ' + ticker)
+
+    if function_call == "get_cash_flow":
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            for ticker in stock_list:
+                        df[ticker] = executor.submit(si.get_cash_flow,ticker)
+        for ticker in stock_list:
+            try:
+                df[ticker] = df[ticker].result(60) # 60 sec timeout
+            except:
+                print('error on ' + ticker)
+
+    recent_sheets = pd.DataFrame(np.empty((0, 1)))
+    recent_sheets = {ticker : sheet.iloc[:,:1] for ticker,sheet in balance_sheets.items()}
+    for ticker in recent_sheets.keys():
+        recent_sheets[ticker].columns = ['Recent']
+    return recent_sheets
+
 startTime = time.time()
+current_runtime = time.time() - startTime
+print('timer started seconds - ' + str(round(current_runtime,2)))
 balance_sheets = {}
 stock_list =['AMZN','KO','TSLA','GME','AAPL','GOOG','SPOT']
 stock_list.extend(si.tickers_sp500())
-print(stock_list)
+# print(stock_list)
 
-income_statements = {}
-with concurrent.futures.ProcessPoolExecutor() as executor:
-    for ticker in stock_list:
-        balance_sheets[ticker] = executor.submit(si.get_balance_sheet,ticker)
+current_runtime = time.time() - startTime
+print('s&p500 pull done seconds - ' + str(round(current_runtime,2)))
 
-for ticker in stock_list:
-    try:
-        balance_sheets[ticker] = balance_sheets[ticker].result(60) # 60 sec timeout
-    except:
-        print('error on ' + ticker)
-    
-print('balance sheets done - ' + str(time.time() - startTime))
+balance_sheets = {}
+balance_sheets = pull_fin_info(balance_sheets, "get_balance_sheet", stock_list)
+
+current_runtime = time.time() - startTime 
+print('balance sheets done seconds - ' + str(round(current_runtime,2)))
 
 recent_sheets = pd.DataFrame(np.empty((0, 1)))   
 recent_sheets = {ticker : sheet.iloc[:,:1] for ticker,sheet in balance_sheets.items()}
@@ -35,7 +69,8 @@ combined_sheets = pd.concat(recent_sheets)
 combined_sheets = combined_sheets.reset_index()
 combined_sheets.columns = ['Ticker', 'Breakdown', 'Recent']
 
-print('combined sheets done - ' + str(time.time() - startTime))
+current_runtime = time.time() - startTime 
+print('combined sheets done seconds - ' + str(round(current_runtime,2)))
 
 income_statements = {}
 with concurrent.futures.ProcessPoolExecutor() as executor:
@@ -45,7 +80,8 @@ with concurrent.futures.ProcessPoolExecutor() as executor:
 for ticker in stock_list:
     income_statements[ticker] = income_statements[ticker].result()
 
-print('income statements done - ' + str(time.time() - startTime))
+current_runtime = time.time() - startTime 
+print('income statements done seconds - ' + str(round(current_runtime,2)))
 
 recent_income_statements = {ticker : sheet.iloc[:,:1] for ticker,sheet in income_statements.items()}
 for ticker in recent_income_statements.keys():
@@ -56,14 +92,10 @@ combined_income = combined_income.reset_index()
 combined_income.columns = ['Ticker', 'Breakdown', 'Recent']
 
 cash_flow_statements = {}
-with concurrent.futures.ProcessPoolExecutor() as executor:
-    for ticker in stock_list:
-        cash_flow_statements[ticker] = executor.submit(si.get_cash_flow,ticker)
+cash_flow_statements = pull_fin_info(cash_flow_statements, "get_cash_flow", stock_list)
 
-for ticker in stock_list:
-    cash_flow_statements[ticker] = cash_flow_statements[ticker].result()
-
-print('cash flow statements done - ' + str(time.time() - startTime))
+current_runtime = time.time() - startTime
+print('cash flow statements done seconds - ' + str(round(current_runtime,2)))
 
 recent_cash_flow_statements = {ticker : sheet.iloc[:,:1] for ticker,sheet in income_statements.items()}
 for ticker in recent_cash_flow_statements.keys():
@@ -83,5 +115,5 @@ pivot_df.query("Ticker == 'AMZN'")
 
 pivot_df.query("ebit >= 0")
 
-executionTime = (time.time() - startTime)
-print('Execution time in seconds: ' + str(executionTime))
+current_runtime = (time.time() - startTime)
+print('Execution time in seconds: ' + str(round(current_runtime,2)))
