@@ -31,9 +31,10 @@ current_runtime = time.time() - startTime
 print('timer started seconds - ' + str(round(current_runtime,2)))
 
 balance_sheets = {}
-stock_list = [] #['AMZN','KO','TSLA','GME','AAPL','GOOG','SPOT']
+stock_list = ['AMZN','KO','TSLA','GME','AAPL','GOOG','SPOT']
 
 stock_list.extend(si.tickers_dow())
+stock_list = list(dict.fromkeys(stock_list))
 # print(stock_list)
 current_runtime = time.time() - startTime
 print('s&p500 pull done seconds - ' + str(round(current_runtime,2)))
@@ -68,3 +69,4 @@ print(pivot_df.query("ebit >= 0"))
 
 current_runtime = (time.time() - startTime)
 print('Execution time in seconds: ' + str(round(current_runtime,2)))
+
