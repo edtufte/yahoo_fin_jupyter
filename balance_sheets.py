@@ -13,6 +13,7 @@ def pull_fin_info(df, function_call, stock_list):
     for ticker in stock_list:
         try:
             df[ticker] = df[ticker].result(12) # 60 sec timeout
+            break
         except:
             print('error on ' + ticker)
 
@@ -33,7 +34,7 @@ print('timer started seconds - ' + str(round(current_runtime,2)))
 balance_sheets = {}
 stock_list = ['AMZN','KO','TSLA','GME','AAPL','GOOG','SPOT']
 
-stock_list.extend(si.tickers_dow())
+stock_list.extend(si.tickers_ftse100())
 stock_list = list(dict.fromkeys(stock_list))
 # print(stock_list)
 current_runtime = time.time() - startTime
