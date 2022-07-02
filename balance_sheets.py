@@ -18,11 +18,17 @@ def pull_fin_info(function_call, stock_list):
             print('error on ' + ticker)
             break
     
+    print(results_df)
+
     recent_sheets = pd.DataFrame(np.empty((0, 1)))
     recent_sheets = {ticker : sheet.iloc[:,:1] for ticker,sheet in results_df.items()}
     for ticker in recent_sheets.keys():
-        recent_sheets[ticker].columns = ['Recent']
-    
+        # if recent_sheets[ticker].columns() > 0:
+        try:
+            recent_sheets[ticker].columns = ['Recent']
+        except ValueError:
+            print('error on ' + ticker)
+
     recent_sheets = pd.concat(recent_sheets)
     recent_sheets = recent_sheets.reset_index()
     recent_sheets.columns = ['Ticker', 'Breakdown', 'Recent']
@@ -33,8 +39,9 @@ startTime = time.time()
 print('timer started seconds - ' + str(round(time.time() - startTime,2)))
 
 stock_list = ['AMZN','KO','TSLA','GME','AAPL','GOOG','SPOT']
+stock_list.extend(['ELV'])
 
-stock_list.extend(si.tickers_ftse100())
+# stock_list.extend(si.tickers_dow())
 # stock_list.extend(si.tickers_sp500())
 print('stock list pull done seconds - ' + str(round(time.time() - startTime,2)))
 
