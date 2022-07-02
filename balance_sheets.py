@@ -15,10 +15,10 @@ def pull_fin_info(function_call, stock_list):
         try:
             results_df[ticker] = futures_df[ticker].result(60) # 60 sec timeout
         except:
-            print('error on ' + ticker)
+            print('pull error on ' + ticker)
             break
     
-    print(results_df)
+    # print(results_df)
 
     recent_sheets = pd.DataFrame(np.empty((0, 1)))
     recent_sheets = {ticker : sheet.iloc[:,:1] for ticker,sheet in results_df.items()}
@@ -27,7 +27,7 @@ def pull_fin_info(function_call, stock_list):
         try:
             recent_sheets[ticker].columns = ['Recent']
         except ValueError:
-            print('error on ' + ticker)
+            print('column re-name error on ' + ticker)
 
     recent_sheets = pd.concat(recent_sheets)
     recent_sheets = recent_sheets.reset_index()
@@ -41,7 +41,7 @@ print('timer started seconds - ' + str(round(time.time() - startTime,2)))
 stock_list = ['AMZN','KO','TSLA','GME','AAPL','GOOG','SPOT']
 stock_list.extend(['ELV'])
 
-# stock_list.extend(si.tickers_dow())
+stock_list.extend(si.tickers_dow())
 # stock_list.extend(si.tickers_sp500())
 print('stock list pull done seconds - ' + str(round(time.time() - startTime,2)))
 
