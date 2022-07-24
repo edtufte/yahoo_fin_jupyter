@@ -67,4 +67,6 @@ print(pivot_df.query("Ticker == 'AMZN'"))
 
 print(pivot_df.query("ebit >= 0"))
 
+print(pivot_df.head())
+
 print('Execution time in seconds: ' + str(round(time.time() - startTime,2)))
